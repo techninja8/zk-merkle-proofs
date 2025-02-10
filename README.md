@@ -3,7 +3,7 @@
 UPDATED README.md
 
 ## Overview
-This Rust program implements a **Sigma Protocol** to prove membership in a **Merkle Tree** using **Elliptic Curve Cryptography (ECC)** over **Secp256k1**. The protocol enables a prover to demonstrate that a given transaction belongs to a Merkle tree without revealing any other transactions, ensuring privacy and efficiency.
+This Rust program implements a **Sigma Protocol** to prove membership in a **Merkle Tree** using **Elliptic Curve Cryptography (ECC)** over **Secp256k1**. The protocol enables a prover to demonstrate that a given transaction belongs to a Merkle tree without revealing any other transactions or any information related to the Merkle tree at all (including merkle proof and merkle root), ensuring privacy and efficiency.
 
 ## Features
 - **Merkle Tree Construction**: Builds a Merkle tree from a set of hashed transaction data.
