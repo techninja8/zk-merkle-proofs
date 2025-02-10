@@ -11,8 +11,8 @@ use std::fmt;
 
 const HASH_SIZE: usize = 32;
 
-// The prover calculates the merkle root and merkle proof (Vec<Hash>) and trasforms it into
-// Scalar<Secp256k1> so we can feed it to the Sigma Prover Algoritm can run.
+// The prover calculates the merkle root and merkle tree (Vec<Hash>) and trasforms it into
+// Point<Secp256k1> so we can feed it to the algorithm that the verifier can run.
 #[derive(Debug, Clone, PartialEq)]
 pub struct Hash([u8; HASH_SIZE]);
 
@@ -41,15 +41,17 @@ fn multiply_points(p1: &Point<Secp256k1>, p2: &Point<Secp256k1>) -> Point<Secp25
     Point::<Secp256k1>::generator() * scalar_product
 }
 
-fn compute_merkle_product(transac_data: Vec<Vec<u8>>) -> Scalar<Secp256k1> {
+fn compute_merkle_product(transac_data: Vec<Vec<u8>>, index: usize) -> Scalar<Secp256k1> {
     let leaf_hashes: Vec<Hash> = transac_data
         .into_iter()
         .map(|d| Hash::compute_hash(&d))
         .collect();
 
     let (merkle_tree, merkle_root) = build_merkle_tree(&leaf_hashes);
+
+    let merkle_proof = compute_merkle_proof(&merkle_tree, index);
     
-    let mt_scalar = safe_scalar_from_hash(&merkle_tree.concat());
+    let mt_scalar = safe_scalar_from_hash(&merkle_proof.concat());
     let mp_scalar = safe_scalar_from_hash(&merkle_root);
 
     let mt_point = Point::<Secp256k1>::generator() * mt_scalar;
@@ -107,6 +109,37 @@ pub fn build_merkle_tree(hashed_data: &[Hash]) -> (Vec<Vec<u8>>, [u8; HASH_SIZE]
     )
 }
 
+pub fn compute_merkle_proof(tree: &Vec<Vec<u8>>, index: usize) -> Vec<[u8; HASH_SIZE]> {
+    let mut proof = Vec::new();
+    let mut node_index = index;
+
+    for level in 0..tree.len() - 1 {
+        let level_hashes = &tree[level];
+
+        // Extract 32-byte chunks representing hashes
+        let chunk_size = HASH_SIZE;
+        let num_nodes = level_hashes.len() / chunk_size;
+
+        if num_nodes <= node_index {
+            break;
+        }
+
+        let sibling_index = if node_index % 2 == 0 { node_index + 1 } else { node_index - 1 };
+
+        if sibling_index < num_nodes {
+            let start = sibling_index * chunk_size;
+            let end = start + chunk_size;
+            let mut sibling_hash = [0u8; HASH_SIZE];
+            sibling_hash.copy_from_slice(&level_hashes[start..end]);
+            proof.push(sibling_hash);
+        }
+
+        node_index /= 2;
+    }
+
+    proof
+}
+
 impl SigmaProtocol {
     fn new(w: &Scalar<Secp256k1>) -> Self{
         let g = Point::<Secp256k1>::generator();
@@ -153,7 +186,9 @@ fn main() {
         b"some_random_data5".to_vec(),
     ];
 
-    let merkle_product = compute_merkle_product(some_random_transaction_data);
+    let index : usize = 4;
+
+    let merkle_product = compute_merkle_product(some_random_transaction_data, 4);
     
     // println!("Merkle Product (Secret Key): {:?}", merkle_product);
 
@@ -169,5 +204,9 @@ fn main() {
 
     let is_valid = sigma.verify(&t, &e, &z);
 
-    println!("Proof is {}", is_valid);
+    if is_valid {
+        println!("The Proof is Valid, Thus Leaf at {index} is a Member of The Tree");
+    } else {
+        println!("The Proof is Invalid");
+    }
 }
