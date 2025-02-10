@@ -1,7 +1,3 @@
-#![allow(unused_imports)]
-#![allow(unused_variables)]
-#![allow(dead_code)]
-
 use curv::arithmetic::Converter;
 use curv::elliptic::curves::{Secp256k1, Point, Scalar};
 use sha2::{Digest, Sha256};
@@ -26,7 +22,8 @@ struct SigmaProtocol {
 fn safe_scalar_from_hash(hash: &[u8]) -> Scalar<Secp256k1> {
     let mut hash_fixed = [0u8; 32];
     hash_fixed.copy_from_slice(&hash[..32]);
-    Scalar::<Secp256k1>::from_bytes(&hash_fixed).unwrap_or_else(|_| Scalar::<Secp256k1>::random())
+    Scalar::<Secp256k1>::from_bytes(&hash_fixed)
+        .unwrap_or_else(|_| Scalar::<Secp256k1>::random())
 }
 
 fn multiply_points(p1: &Point<Secp256k1>, p2: &Point<Secp256k1>) -> Point<Secp256k1> {
