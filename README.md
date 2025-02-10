@@ -1,54 +1,77 @@
-# ZK-Merkle-Proofs
+# Sigma Protocol for Merkle Tree Membership Proof (Semi-ZK)
 
-## Project Description
+UPDATED README.md
 
-**ZK-Merkle-Proofs** is a Rust-based implementation of a Zero-Knowledge Proof (ZKP) system utilizing Merkle Trees for efficient and privacy-preserving verification. The project demonstrates how to generate, prove, and verify Merkle proofs while ensuring that a verifier can authenticate a transaction without learning unnecessary details.  
+## Overview
+This Rust program implements a **Sigma Protocol** to prove membership in a **Merkle Tree** using **Elliptic Curve Cryptography (ECC)** over **Secp256k1**. The protocol enables a prover to demonstrate that a given transaction belongs to a Merkle tree without revealing any other transactions, ensuring privacy and efficiency.
 
-The system follows a structured **Fiat-Shamir heuristic** approach for non-interactive proof generation, making it secure and suitable for blockchain applications, data authentication, and trustless verification mechanisms.  
+## Features
+- **Merkle Tree Construction**: Builds a Merkle tree from a set of hashed transaction data.
+- **Merkle Proof Computation**: Extracts the Merkle proof path for a given transaction.
+- **Elliptic Curve Mapping**: Maps Merkle proofs and roots to ECC scalars.
+- **Sigma Protocol Implementation**: Implements the three steps of a Sigma protocol:
+  1. **Commitment** (`commit()`) - Generates a random elliptic curve commitment.
+  2. **Challenge** (`challenge()`) - Computes a challenge hash.
+  3. **Response** (`response()`) - Computes a proof response.
+- **Proof Verification**: Checks if the proof is valid using elliptic curve operations.
 
-## Features  
+## How It Works
+1. **Construct the Merkle Tree**:
+   - The program generates a Merkle tree from sample transactions.
+   - Computes the Merkle root and extracts a Merkle proof for a given leaf.
+   
+2. **Map Merkle Proof and Merkle Root to Elliptic Curve To Employ Them As Secret Keys**:
+   - Converts the Merkle proof into a scalar.
+   - Maps the scalar to an elliptic curve point.
+   - Then Transform Them To Scalar (I honestly don't know why I did this 😂).
+   
+3. **Generate and Verify a Sigma Proof**:
+   - The prover generates a **commitment** (`t = g * r`).
+   - A **challenge** (`e`) is computed using SHA-256.
+   - The prover computes a **response** (`z = r + e * w`).
+   - The verifier checks `g * z == t + x * e`.
+   - The verifier learns nothing about `w`, so they cannot know the proof, the root or anything about the tree.
+   
+4. **Validate Membership**:
+   - If the equation holds to be true, the proof is valid, and the transaction is part of the Merkle tree.
+   - Otherwise, the proof fails.
 
-✅ **Merkle Tree Construction** – Efficiently computes the root hash from a set of transactions.  
-✅ **Merkle Proof Generation** – Computes inclusion proofs for specific transactions.  
-✅ **Zero-Knowledge Proof System** – Implements a challenge-response mechanism for trustless verification.  
-✅ **Attack Simulation** – Demonstrates resilience against proof forgery attempts.  
-✅ **Rust Implementation** – High-performance and memory-safe execution.  
+## Installation
+### **Prerequisites**
+- Install [Rust](https://www.rust-lang.org/)
+- Install Cargo package manager (mine came with Rust, so, I'm pretty sure your's will too!)
 
-## Installation & Usage  
-
-### Prerequisites  
-- Rust (latest stable version)  
-- Cargo (Rust package manager)  
-
-### Clone the Repository  
+### **Clone the Repository**
 ```sh
-git clone https://github.com/yourusername/zk-merkle-proofs.git
-cd zk-merkle-proofs
+git clone <repo-url>
+cd <repo-folder>
 ```
 
-### Build and Run  
+### **Dependencies**
+Check `Cargo.toml` file for the list of dependencies
+
+### **Run the Program**
 ```sh
 cargo run
 ```
 
-### Expected Output  
-The program computes the **Merkle Root**, generates a **commitment**, and validates the proof using a **verifier function**. If the verification passes, it outputs:  
+## Expected Output
+If verification succeeds, the output will be:
 ```
-Merkle Root: <computed_hash>
-ZKP Verification: true
+The Proof is Valid, Thus Leaf at 4 is a Member of The Tree
 ```
-If an attack is attempted, the system correctly rejects the fake proof.  
-
-## Project Structure  
-
+Otherwise, it prints:
 ```
-📂 ZK-Merkle-Proofs  
- ├── src/  
- │   ├── main.rs   
- ├── Cargo.toml    
- ├── README.md  
+The Proof is Invalid
 ```
 
-## License  
+## Some Things I Should Note
+This program does not make use of ZK-SNARKS or ZK-STARKS, it's still very experimental and definitely not production-ready. It works by transforming a the merkle proof and merkle roots (two fundamental parts for proving inclusion) and hides it from the verifier, this property, I fell gives the design a considerate (but not efficient) zero knowledge. Yh, and to make use of the Sigma protocol, I employed ECCs for computing sigma's parameters, making the Merkle proof and Merkle roots secret keys. This allowed the program to compute the proof correctly.
 
-This project is open-source and licensed under the **MIT License**.  
+## License
+This project is open-source and licensed under the MIT License. Feel Free To Expand Or Experiment with it too!
+
+## Author
+Developed by Blessed Tosin-Oyinbo (tnxl)
+
+
