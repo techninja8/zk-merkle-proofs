@@ -6,14 +6,14 @@ UPDATED README.md
 This Rust program implements a **Sigma Protocol** to prove membership in a **Merkle Tree** using **Elliptic Curve Cryptography (ECC)** over **Secp256k1**. The protocol enables a prover to demonstrate that a given transaction belongs to a Merkle tree without revealing any other transactions or any information related to the Merkle tree at all (including merkle proof and merkle root), ensuring privacy and efficiency.
 
 ## Features
-- **Merkle Tree Construction**: Builds a Merkle tree from a set of hashed transaction data.
+- **Merkle Tree Construction**: Builds a Merkle tree from a set of hashed transaction data, returns the merkle root.
 - **Merkle Proof Computation**: Extracts the Merkle proof path for a given transaction.
-- **Elliptic Curve Mapping**: Maps Merkle proofs and roots to ECC scalars.
+- **Elliptic Curve Mapping**: Maps Merkle proofs and roots to ECC scalars and sets them as Sigma-Secrets (merkle-product).
 - **Sigma Protocol Implementation**: Implements the three steps of a Sigma protocol:
   1. **Commitment** (`commit()`) - Generates a random elliptic curve commitment.
   2. **Challenge** (`challenge()`) - Computes a challenge hash.
   3. **Response** (`response()`) - Computes a proof response.
-- **Proof Verification**: Checks if the proof is valid using elliptic curve operations.
+- **Proof Verification**: Checks if the proof is valid using elliptic curve operations and returns a boolean indicating validity.
 
 ## How It Works
 1. **Construct the Merkle Tree**:
@@ -34,7 +34,7 @@ This Rust program implements a **Sigma Protocol** to prove membership in a **Mer
    
 4. **Validate Membership**:
    - If the equation holds to be true, the proof is valid, and the transaction is part of the Merkle tree.
-   - Otherwise, the proof fails.
+   - Otherwise, the proof fails, indicating the prover did not actually present a merkle proof with the correct path and the correct root.
 
 ## Installation
 ### **Prerequisites**
