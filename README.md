@@ -23,7 +23,7 @@ This Rust program implements a **Sigma Protocol** to prove membership in a **Mer
 2. **Map Merkle Proof and Merkle Root to Elliptic Curve To Employ Them As Secret Keys**:
    - Converts the Merkle proof into a scalar.
    - Maps the scalar to an elliptic curve point.
-   - Then Transform Them To Scalar (I honestly don't know why I did this 😂).
+   - Then Transform Them To Scalar
    
 3. **Generate and Verify a Sigma Proof**:
    - The prover generates a **commitment** (`t = g * r`).
